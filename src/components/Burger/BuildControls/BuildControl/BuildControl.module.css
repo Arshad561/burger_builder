@@ -54,3 +54,7 @@
     background-color: #99703F;
     color: white;
 }
+
+.BuildControl button:active {
+    transform: translateY(4px);
+}
