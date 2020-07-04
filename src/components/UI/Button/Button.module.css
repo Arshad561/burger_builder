@@ -26,3 +26,8 @@
 .Button:active {
     transform: translateY(4px);
 }
+
+.Button:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}
