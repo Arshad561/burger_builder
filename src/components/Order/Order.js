@@ -24,7 +24,7 @@ const Order = (props) => {
         <div className={orderClasses.Order}>
             <p>OrderId: <strong>{props.id}</strong></p>
             <p>Ingredients: {ingredientOutput}</p>
-            <p>Price: <strong>${props.price}</strong></p>
+            <p>Price: <strong>${props.price.toFixed(2)}</strong></p>
         </div>
     );
 };
