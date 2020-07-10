@@ -8,6 +8,7 @@ import Spinner from '../../../components/UI/Spinner/Spinner';
 import Input from '../../../components/UI/Forms/Input/Input';
 import withErrorHandler from '../../../hoc/withErrorHandler/withErrorHandler';
 import { purchaseBurger } from '../../../store/actions/index';
+import updateObject, { checkValidations } from '../../../shared/utility';
 
 class ContactData extends Component {
     state = {
@@ -115,16 +116,14 @@ class ContactData extends Component {
     };
 
     inputChangedHandler = (event, label) => {
-        let updatedOrderForm = {
-            ...this.state.orderForm
-        };
-        let updatedFormElement = {
-            ...updatedOrderForm[label]
-        };
-        updatedFormElement.value = event.target.value;
-        updatedFormElement.valid = this.checkValidations(updatedFormElement.value, updatedFormElement.validations);
-        updatedFormElement.touched = true;
-        updatedOrderForm[label] = updatedFormElement;
+        const updatedFormElement = updateObject(this.state.orderForm[label], {
+            value: event.target.value,
+            valid: checkValidations(event.target.value, this.state.orderForm[label].validations),
+            touched: true
+        });
+        const updatedOrderForm = updateObject(this.state.orderForm, {
+            [label]: updatedFormElement
+        });
         let formIsValid = Object.keys(updatedOrderForm).some(key => {
             return updatedOrderForm[key].valid === false
         });
@@ -133,20 +132,6 @@ class ContactData extends Component {
             formIsValid: !formIsValid
         });
     };
-
-    checkValidations = (value, rules) => {
-        let isValid = true;
-        if (rules.required) {
-            isValid = value.trim() !== '' && isValid;
-        }
-        if (rules.minLength) {
-            isValid = value.length >= rules.minLength && isValid;
-        }
-        if (rules.maxLength) {
-            isValid = value.length <= rules.minLength && isValid;
-        }
-        return isValid;
-    }
 
     render() {
         const formElementsArray = Object.keys(this.state.orderForm).map(formElement => {
@@ -159,15 +144,15 @@ class ContactData extends Component {
         const elements = formElementsArray.map(formElement => {
             return <Input key={formElement.label} elementType={formElement.elementType}
                 elementConfig={formElement.elementConfig} label={formElement.label}
-                value={formElement.value} inValid = {!formElement.valid}
-                shouldValidate = {formElement.validations} touched = {formElement.touched}
+                value={formElement.value} inValid={!formElement.valid}
+                shouldValidate={formElement.validations} touched={formElement.touched}
                 changed={(event) => this.inputChangedHandler(event, formElement.label)} />
         });
 
         let form = (
             <form onSubmit={this.orderHandler}>
                 {elements}
-                <Button disabled = {!this.state.formIsValid} btnType='Success'>ORDER</Button>
+                <Button disabled={!this.state.formIsValid} btnType='Success'>ORDER</Button>
             </form>
         );
 

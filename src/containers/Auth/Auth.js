@@ -7,6 +7,7 @@ import Input from '../../components/UI/Forms/Input/Input';
 import authClasses from './Auth.module.css';
 import { auth, setAuthRedirectPath } from '../../store/actions/index';
 import Spinner from '../../components/UI/Spinner/Spinner';
+import updateObject, { checkValidations } from '../../shared/utility';
 
 class Auth extends Component {
     state = {
@@ -50,37 +51,18 @@ class Auth extends Component {
     }
 
     inputChangedHandler = (event, label) => {
-        let updatedControls = {
-            ...this.state.controls
-        };
-        let updatedFormElement = {
-            ...updatedControls[label]
-        };
-        updatedFormElement.value = event.target.value;
-        updatedFormElement.valid = this.checkValidations(updatedFormElement.value, updatedFormElement.validations);
-        updatedFormElement.touched = true;
-        updatedControls[label] = updatedFormElement;
-        // let formIsValid = Object.keys(updatedControls).some(key => {
-        //     return updatedControls[key].valid === false
-        // });
+        const updatedFormElement = updateObject(this.state.controls[label], {
+            value: event.target.value,
+            valid: checkValidations(event.target.value, this.state.controls[label].validations),
+            touched: true
+        });
+        const updatedControls = updateObject(this.state.controls, {
+            [label]: updatedFormElement
+        });
         this.setState({
             controls: updatedControls
         });
     };
-
-    checkValidations = (value, rules) => {
-        let isValid = true;
-        if (rules.required) {
-            isValid = value.trim() !== '' && isValid;
-        }
-        if (rules.minLength) {
-            isValid = value.length >= rules.minLength && isValid;
-        }
-        if (rules.maxLength) {
-            isValid = value.length <= rules.minLength && isValid;
-        }
-        return isValid;
-    }
 
     submitHandler = (event) => {
         event.preventDefault();
@@ -94,7 +76,7 @@ class Auth extends Component {
             }
         })
     }
-    
+
     render() {
 
         const formElementsArray = Object.keys(this.state.controls).map(formElement => {
@@ -107,8 +89,8 @@ class Auth extends Component {
         const elements = formElementsArray.map(formElement => {
             return <Input key={formElement.label} elementType={formElement.elementType}
                 elementConfig={formElement.elementConfig} label={formElement.label}
-                value={formElement.value} inValid = {!formElement.valid}
-                shouldValidate = {formElement.validations} touched = {formElement.touched}
+                value={formElement.value} inValid={!formElement.valid}
+                shouldValidate={formElement.validations} touched={formElement.touched}
                 changed={(event) => this.inputChangedHandler(event, formElement.label)} />
         });
 
@@ -118,25 +100,25 @@ class Auth extends Component {
                 <Button btnType='Success'>SUBMIT</Button>
             </form>
         );
-        
+
         if (this.props.loading) {
-            form = <Spinner/>
+            form = <Spinner />
         }
 
         let errorMessage = null;
         if (this.props.error) {
             errorMessage = (
-            <p style = {{color: 'red'}}>{this.props.error.message}</p>
+                <p style={{ color: 'red' }}>{this.props.error.message}</p>
             );
         }
 
         return (
-            <div className = {authClasses.Auth}>
-                {this.props.token ? <Redirect to = {this.props.authRedirectPath}/> : null}
+            <div className={authClasses.Auth}>
+                {this.props.token ? <Redirect to={this.props.authRedirectPath} /> : null}
                 {errorMessage}
                 {form}
-                <Button clicked = {this.switchAuthModeHandler}
-                btnType = 'Danger'>SWITCH TO {this.state.isSignup ? 'SIGN IN' : 'SIGN UP'}</Button>
+                <Button clicked={this.switchAuthModeHandler}
+                    btnType='Danger'>SWITCH TO {this.state.isSignup ? 'SIGN IN' : 'SIGN UP'}</Button>
             </div>
         )
     }
